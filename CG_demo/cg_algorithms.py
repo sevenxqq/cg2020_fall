@@ -15,21 +15,51 @@ def draw_line(p_list, algorithm):
     x0, y0 = p_list[0]
     x1, y1 = p_list[1]
     result = []
+    """
+        :处理特殊的直线
+        :竖直线
+        :水平线
+        :对角线
+    """
+    if x0 == x1:
+        if y0 > y1:
+            y0, y1 = y1, y0
+        for y in range(y0, y1 + 1):
+            result.append((x0, y))
+        return result
+    elif y0 == y1:
+        if x0 > x1:
+            x0, x1 = x1, x0
+        for x in range(x0, x1 + 1):
+            result.append(x, y0)
+        return result
+    if x0 > x1:
+        x0, y0, x1, y1 = x1, y1, x0, y0
+    k = (y1 - y0) / (x1 - x0)
+    if k == 1:
+        for x in range(x0, x1 + 1):
+            result.append(x, x)
+        return result
+    elif k == -1:
+        for x in range(x0, x1 + 1):
+            result.append(x, -x)
+        return result
+    """
+    :根据不同算法生成直线
+    """
+
     if algorithm == 'Naive':
-        if x0 == x1:
-            for y in range(y0, y1 + 1):
-                result.append((x0, y))
-        else:
-            if x0 > x1:
-                x0, y0, x1, y1 = x1, y1, x0, y0
-            k = (y1 - y0) / (x1 - x0)
-            for x in range(x0, x1 + 1):
-                result.append((x, int(y0 + k * (x - x0))))
+        if x0 > x1:
+            x0, y0, x1, y1 = x1, y1, x0, y0
+        k = (y1 - y0) / (x1 - x0)
+        for x in range(x0, x1 + 1):
+            result.append((x, int(y0 + k * (x - x0))))
     elif algorithm == 'DDA':
         """
         : 为了让点更密集，当k绝对值>1时将x y反转
         """
         if x0 == x1:
+
             for y in range(y0, y1 + 1):
                 result.append((x0, y))
         else:
@@ -50,18 +80,40 @@ def draw_line(p_list, algorithm):
         :对于点对A1，要移动到下一个点对A2，采取四舍五入，如果A2-A1超过半格，上移，否则平移
         https://blog.csdn.net/chenjiayi_yun/article/details/38601439
         """
-        # 先写个第一象限上升的再慢慢改
-        dx = x1 - x0
-        dy = y1 - y0
-        k = dy / dx
-        cur = -0.5
-        y = y0
-        for x in range(x0, x1 + 1):
-            cur += k
-            if cur > 0:
-                y += 1
-                cur -= 1
-            result.append((x, y))
+        if abs(k) < 1:
+            if y0 > y1:
+                x0, y0, x1, y1 = x1, y1, x0, y0
+            dx = x1 - x0
+            dy = y1 - y0
+            detax = dx << 1
+            detay = dy << 1
+            pk = -dx
+            y = y0
+            dirtion = 1
+            if k < 0:
+                dirtion = -1
+            for x in range(x0, x1 + 1, dirtion):
+                pk += detay
+                if pk > 0:
+                    y += 1
+                    pk -= detax
+                result.append((x, y))
+        else:
+            dx = x1 - x0
+            dy = y1 - y0
+            detax = dx << 1
+            detay = dy << 1
+            pk = -dy
+            x = x0
+            dirtion = 1
+            if k < 0:
+                dirtion = -1
+            for y in range(y0, y1 + 1, dirtion):
+                pk += detax
+                if pk > 0:
+                    x += 1
+                    pk -= detay
+                result.append((x, y))
     return result
 
 
