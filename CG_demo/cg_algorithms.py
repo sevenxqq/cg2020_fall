@@ -36,18 +36,18 @@ def draw_line(p_list, algorithm):
     if x0 > x1:
         x0, y0, x1, y1 = x1, y1, x0, y0
     k = (y1 - y0) / (x1 - x0)
-    if k == 1:
+    if k == 1 and x0==y0:
         for x in range(x0, x1 + 1):
-            result.append(x, x)
+            result.append((x, x))
         return result
-    elif k == -1:
+    elif k == -1 and x0==-y0:
         for x in range(x0, x1 + 1):
-            result.append(x, -x)
+            result.append((x, -x))
         return result
     """
     :根据不同算法生成直线
     """
-
+    print("当前直线斜率为：", k)
     if algorithm == 'Naive':
         if x0 > x1:
             x0, y0, x1, y1 = x1, y1, x0, y0
@@ -55,31 +55,26 @@ def draw_line(p_list, algorithm):
         for x in range(x0, x1 + 1):
             result.append((x, int(y0 + k * (x - x0))))
     elif algorithm == 'DDA':
+        print("使用DDA算法")
         """
         : 为了让点更密集，当k绝对值>1时将x y反转
         """
-        if x0 == x1:
-
-            for y in range(y0, y1 + 1):
-                result.append((x0, y))
+        if k > -1 and k < 1:
+            for x in range(x0, x1 + 1):
+                y = k * (x - x0) + y0
+                print("点对为",x,y)
+                result.append((x, int(y)))
         else:
-            if x0 > x1:
+            if y0 > y1:
                 x0, y0, x1, y1 = x1, y1, x0, y0
-            k = (y1 - y0) / (x1 - x0)
-            if k > -1 and k < 1:
-                for x in range(x0, x1 + 1):
-                    result.append((x, int(y0 + k * (x - x0))))
-            else:
-                if y0 > y1:
-                    x0, y0, x1, y1 = x1, y1, x0, y0
-                t = (x1 - x0) / (y1 - y0)
-                for y in range(y0, y1 + 1):
-                    result.append((int(x0 + t * (y - y0)), y))
+            t = (x1 - x0) / (y1 - y0)
+            for y in range(y0, y1 + 1):
+                result.append((int(x0 + t * (y - y0)), y))
     elif algorithm == 'Bresenham':
         """
-        :对于点对A1，要移动到下一个点对A2，采取四舍五入，如果A2-A1超过半格，上移，否则平移
-        https://blog.csdn.net/chenjiayi_yun/article/details/38601439
+
         """
+        print("使用Bresenham算法")
         if abs(k) < 1:
             if y0 > y1:
                 x0, y0, x1, y1 = x1, y1, x0, y0
@@ -134,7 +129,7 @@ def draw_polygon(p_list, algorithm):
 def draw_ellipse(p_list):
     """绘制椭圆（采用中点圆生成算法）
 
-    :param p_list: (list of list of int: [[x0, y0], [x1, y1]]) 椭圆的矩形包围框左上角和右下角顶点坐标
+    :param p_list: (list of list of int: [[x0, y0], [x1, y1]]) 椭圆的矩形包围框左上角和右下角顶点坐标;
     :return: (list of list of int: [[x_0, y_0], [x_1, y_1], [x_2, y_2], ...]) 绘制结果的像素点坐标列表
     """
     pass

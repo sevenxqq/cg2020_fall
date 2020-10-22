@@ -34,7 +34,8 @@ if __name__ == '__main__':
                     if item_type == 'line':
                         pixels = alg.draw_line(p_list, algorithm)
                         for x, y in pixels:
-                            canvas[height - 1 - y, x] = color
+                            print("当前打印",x,y)
+                            canvas[y,x] = color # i use y not height-1-y
                     elif item_type == 'polygon':
                         pass
                     elif item_type == 'ellipse':
