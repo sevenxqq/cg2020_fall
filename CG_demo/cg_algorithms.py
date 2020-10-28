@@ -36,11 +36,11 @@ def draw_line(p_list, algorithm):
     if x0 > x1:
         x0, y0, x1, y1 = x1, y1, x0, y0
     k = (y1 - y0) / (x1 - x0)
-    if k == 1 and x0==y0:
+    if k == 1 and x0 == y0:
         for x in range(x0, x1 + 1):
             result.append((x, x))
         return result
-    elif k == -1 and x0==-y0:
+    elif k == -1 and x0 == -y0:
         for x in range(x0, x1 + 1):
             result.append((x, -x))
         return result
@@ -62,7 +62,7 @@ def draw_line(p_list, algorithm):
         if k > -1 and k < 1:
             for x in range(x0, x1 + 1):
                 y = k * (x - x0) + y0
-                print("点对为",x,y)
+                print("点对为", x, y)
                 result.append((x, int(y)))
         else:
             if y0 > y1:
@@ -132,7 +132,52 @@ def draw_ellipse(p_list):
     :param p_list: (list of list of int: [[x0, y0], [x1, y1]]) 椭圆的矩形包围框左上角和右下角顶点坐标;
     :return: (list of list of int: [[x_0, y_0], [x_1, y_1], [x_2, y_2], ...]) 绘制结果的像素点坐标列表
     """
-    pass
+    #计算椭圆中心和rx,ry
+    x0, y0 = p_list[0]
+    x1, y1 = p_list[1]
+    result = []
+    xc = (x0 + x1) / 2
+    yc = (y0 + y1) / 2
+    rx = abs(x1 - xc)
+    ry = abs(y1 - yc)
+    rx2 = pow(rx, 2)
+    ry2 = pow(ry, 2)
+    x = int(0)
+    y = int(ry)
+    print("画椭圆", xc, yc, rx, ry)
+    pk = ry2 - rx2 * ry + rx2 / 4
+    while ry2 * x< rx2 * y:
+        # print(x,y)
+        if pk < 0:
+            x += 1
+            pk += 2 * x * ry2 + ry2
+            result.append((x, y))
+        else:
+            x += 1
+            y -= 1
+            pk += 2 * x * ry2 + ry2 - 2 * rx2 * y
+            result.append((x, y))
+    pk = ry2 * pow((x + 0.2), 2) + rx2 * (y - 1) - rx2*ry2
+    while y > 0:
+        # print(x,y)
+        if pk > 0:
+            y -= 1
+            pk += rx2 - 2 * rx2 *y  
+            result.append((x, y))
+        else:
+            x += 1
+            y -= 1
+            pk += 2 * ry2 * x- 2 * rx2 * y + rx2   
+            result.append((x, y))
+    #3######3
+    length = len(result)
+    for i in range(length):
+        basex, basey = result[i]
+        result.append((-basex + xc, basey + yc))
+        result.append((-basex + xc, -basey + yc))
+        result.append((basex + xc, -basey + yc))
+        result[i] = (basex + xc, basey + yc)
+    return result
 
 
 def draw_curve(p_list, algorithm):
