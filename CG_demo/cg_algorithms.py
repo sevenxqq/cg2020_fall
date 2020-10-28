@@ -14,6 +14,7 @@ def draw_line(p_list, algorithm):
     """
     x0, y0 = p_list[0]
     x1, y1 = p_list[1]
+    print("画直线",x0,y0,x1,y1)
     result = []
     """
         :处理特殊的直线
@@ -31,7 +32,7 @@ def draw_line(p_list, algorithm):
         if x0 > x1:
             x0, x1 = x1, x0
         for x in range(x0, x1 + 1):
-            result.append(x, y0)
+            result.append((x, y0))
         return result
     if x0 > x1:
         x0, y0, x1, y1 = x1, y1, x0, y0
@@ -62,7 +63,7 @@ def draw_line(p_list, algorithm):
         if k > -1 and k < 1:
             for x in range(x0, x1 + 1):
                 y = k * (x - x0) + y0
-                print("点对为", x, y)
+                # print("点对为", x, y)
                 result.append((x, int(y)))
         else:
             if y0 > y1:
@@ -71,44 +72,46 @@ def draw_line(p_list, algorithm):
             for y in range(y0, y1 + 1):
                 result.append((int(x0 + t * (y - y0)), y))
     elif algorithm == 'Bresenham':
-        """
-
-        """
         print("使用Bresenham算法")
         if abs(k) < 1:
             if y0 > y1:
                 x0, y0, x1, y1 = x1, y1, x0, y0
-            dx = x1 - x0
-            dy = y1 - y0
-            detax = dx << 1
-            detay = dy << 1
-            pk = -dx
-            y = y0
             dirtion = 1
             if k < 0:
                 dirtion = -1
+            dx = x1 - x0
+            dy = y1 - y0
+            dy2 = dy * 2
+            dy2dx = dy2 - dx * 2 * dirtion
+            pk = dy2-dx*dirtion
+            y = y0 - 1
             for x in range(x0, x1 + 1, dirtion):
-                pk += detay
-                if pk > 0:
+                if pk >= 0:
                     y += 1
-                    pk -= detax
-                result.append((x, y))
+                    pk +=dy2dx
+                    result.append((x, y))
+                else:
+                    pk+=dy2
+                    result.append((x, y))
         else:
-            dx = x1 - x0
-            dy = y1 - y0
-            detax = dx << 1
-            detay = dy << 1
-            pk = -dy
-            x = x0
             dirtion = 1
             if k < 0:
                 dirtion = -1
+            dx = x1 - x0
+            dy = y1 - y0
+            dx2 = dx * 2
+            dy2dx = dx2 - dy * 2*dirtion
+            pk = dx2 - dy * dirtion
+            x = x0 - 1    
             for y in range(y0, y1 + 1, dirtion):
-                pk += detax
-                if pk > 0:
+                if pk  < 0:
+                    pk+= dx2
+                    result.append((x, y))   
+                else:
                     x += 1
-                    pk -= detay
-                result.append((x, y))
+                    pk += dy2dx
+                    result.append((x, y))
+                   
     return result
 
 
@@ -142,34 +145,36 @@ def draw_ellipse(p_list):
     ry = abs(y1 - yc)
     rx2 = pow(rx, 2)
     ry2 = pow(ry, 2)
-    x = int(0)
-    y = int(ry)
+    x = 0
+    y = ry
     print("画椭圆", xc, yc, rx, ry)
     pk = ry2 - rx2 * ry + rx2 / 4
-    while ry2 * x< rx2 * y:
+    #####
+    while ry2 * (x + 1)< rx2 * (y - 0.5):
+        # print(x,y)
+        if pk < 0:
+            pk += ry2 *(2*x +3)
+            x += 1
+            result.append((x, y))
+        else:  
+            pk += ry2 *(2*x+3) + rx2 * (2-2*y)
+            x += 1
+            y -= 1
+            result.append((x, y))
+    pk = ry * (x + 0.5) * 2 + rx * 2 * (y - 1) - rx*2*ry
+    ###
+    while y > 0:
         # print(x,y)
         if pk < 0:
             x += 1
-            pk += 2 * x * ry2 + ry2
-            result.append((x, y))
-        else:
-            x += 1
             y -= 1
-            pk += 2 * x * ry2 + ry2 - 2 * rx2 * y
-            result.append((x, y))
-    pk = ry2 * pow((x + 0.2), 2) + rx2 * (y - 1) - rx2*ry2
-    while y > 0:
-        # print(x,y)
-        if pk > 0:
+            pk += 2 * ry2 * x- 2 * rx2 * y + rx2   
+            result.append((x, y))          
+        else:
             y -= 1
             pk += rx2 - 2 * rx2 *y  
             result.append((x, y))
-        else:
-            x += 1
-            y -= 1
-            pk += 2 * ry2 * x- 2 * rx2 * y + rx2   
-            result.append((x, y))
-    #3######3
+    ###33
     length = len(result)
     for i in range(length):
         basex, basey = result[i]
