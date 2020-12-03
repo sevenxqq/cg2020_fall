@@ -1,0 +1,8 @@
+resetCanvas 600 600
+setColor 0 0 255
+drawPolygon polygon1 100 100 500 500 100 500 DDA
+saveCanvas 2
+resetCanvas 600 600
+setColor 0 0 255
+drawPolygon polygon4 200 100 300 100 350 200 300 300 200 300 150 200 Bresenham
+saveCanvas 3

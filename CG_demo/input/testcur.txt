@@ -1,0 +1,5 @@
+resetCanvas 600 600
+setColor 0 255 0
+drawLine line1 0 0 500 250 DDA
+clip line1 50 50 400 200 Cohen-Sutherland
+saveCanvas 1
