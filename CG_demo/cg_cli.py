@@ -106,7 +106,6 @@ if __name__ == '__main__':
                 res = alg.scale(item_dict[item_id][4],x,y,s)
                 item_dict[item_id][4] = res
             elif line[0] == 'clip':
-                print("执行clip命令")
                 item_id = line[1]
                 a = int(line[2])
                 b = int(line[3])

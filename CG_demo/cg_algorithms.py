@@ -274,8 +274,8 @@ def rotate(p_list, x, y, r):
     for i in range(len(p_list)):
         oldx = p_list[i][0]
         oldy = p_list[i][1]
-        p_list[i][0] = oldx * math.cos(radr) - oldy * math.sin(radr)
-        p_list[i][1] =oldx *math.sin(radr) + oldy*math.cos(radr)
+        p_list[i][0] = float(oldx) * float(math.cos(radr)) - float(oldy) * math.sin(radr)
+        p_list[i][1] = float(oldx) *math.sin(radr) + float(oldy)*math.cos(radr)
     for i in range(len(p_list)):
         p_list[i][0]+=x
         p_list[i][1]+=y
@@ -308,14 +308,6 @@ def scale(p_list, x, y, s):
 
 
 #function for clip 
-def poiInWin(x,y,x_min, y_min, x_max, y_max):
-    if x>=x_min and x<=x_max and y>=y_min and y<=y_max:
-        return True
-    return False
-def in4cases (x1,y1,x2,y2,x_min, y_min, x_max, y_max):
-    if (x1<x_min and x2 <x_min) or (x1>x_max and x2>x_max) or (y1<y_min and y2<y_min) or (y1>y_max and y2>y_max):
-        return True
-    return False
 def getCsCode(x,y,x_min, y_min, x_max, y_max):
     res = 0
     if x<x_min:
@@ -365,58 +357,44 @@ def clip(p_list, x_min, y_min, x_max, y_max, algorithm):
     x1, y1 = p_list[1]
     result = []
     if algorithm == "Cohen-Sutherland":
-        print("执行裁剪算法CS")
-        if poiInWin(x0,y0,x_min,y_min,x_max,y_max) ==True and poiInWin(x1,y1,x_min,y_min,x_max,y_max) == True:
-            return draw_line(p_list, "Bresenham")
-        elif poiInWin(x0,y0,x_min,y_min,x_max,y_max) ==False and poiInWin(x1,y1,x_min,y_min,x_max,y_max) == False and in4cases(x0,y0,x1,y1,x_min,y_min,x_max,y_max)==True:
-            return result
-        else:
-            code1 = getCsCode(x0,y0,x_min,y_min,x_max,y_max)
-            code2 = getCsCode(x1,y1,x_min,y_min,x_max,y_max)
-            while(True):
-                if code1 | code2 == 0:
-                    print(p_list)
-                    return draw_line(p_list, "Bresenham")
-                elif code1 & code2 !=0:
-                    return result
-                else: 
-                    k = (y1 - y0)/(x1 - x0)
-                    code = code1
-                    if code1 == 0:  # 选可见的点
-                        code = code2
-                    if code & 0x01 != 0:  # 线段与窗口的左边有交
-                        print("left")
-                        x = x_min
-                        y = y0 + int((x - x0) * k)
-                    elif code & 0x02 != 0:  # 线段与窗口的右边有交
-                        print("right")
-                        x = x_max       
-                        y = y0 + int((x - x0) * k)
-                    elif code & 0x04 != 0:  # 线段与窗口的上边有交
-                        print("up")
-                        y = y_max                       
-                        x = x0 + int((y - y0)/k)
-                    elif code & 0x08 != 0:  # 线段与窗口的下边有交
-                        print("down")
-                        y = y_min
-                        x = x0 + int((y - y0)/k)
-                    if code == code1:   #更新新端点值
-                        code1 = getCsCode(x,y,x_min,y_min,x_max,y_max)
-                        p_list[0] = [x,y]
-                        if poiInWin(x,y,x_min,y_min,x_max,y_max) ==True and poiInWin(x1,y1,x_min,y_min,x_max,y_max) == True:
-                            print("执行于此")
-                            return draw_line(p_list, "Bresenham")
-                        elif poiInWin(x,y,x_min,y_min,x_max,y_max) ==False and poiInWin(x1,y1,x_min,y_min,x_max,y_max) == False and in4cases(x,y,x1,y1,x_min,y_min,x_max,y_max)==True:
-                            return result
-                    else:
-                        code2 = getCsCode(x,y,x_min,y_min,x_max,y_max)
-                        p_list[1] = [x,y]
-                        if poiInWin(x0,y0,x_min,y_min,x_max,y_max) ==True and poiInWin(x,y,x_min,y_min,x_max,y_max) == True:
-                            return draw_line(p_list, "Bresenham")
-                        elif poiInWin(x0,y0,x_min,y_min,x_max,y_max) ==False and poiInWin(x,y,x_min,y_min,x_max,y_max) == False and in4cases(x0,y0,x,y,x_min,y_min,x_max,y_max)==True:
-                            return result
-                    print(code1,code2)
-            return result
+        code1 = getCsCode(x0,y0,x_min,y_min,x_max,y_max)
+        code2 = getCsCode(x1,y1,x_min,y_min,x_max,y_max)
+        while(True):
+            print(code1,code2)
+            x0,y0,x1,y1 = p_list[0][0],p_list[0][1],p_list[1][0],p_list[1][1]
+            print(p_list)
+            if (code1 | code2) == 0:
+                return draw_line(p_list, "Bresenham")
+            elif (code1 & code2) !=0:
+                return result
+            else: 
+                k = (y1 - y0)/(x1 - x0)
+                code = code1
+                if code1 == 0:  # 选可见的点
+                    code = code2
+                if (code & 0x01) != 0:  # 线段与窗口的左边有交
+                    print("left")
+                    x = x_min
+                    y = y0 + int((x - x0) * k)
+                elif (code & 0x02) != 0:  # 线段与窗口的右边有交
+                    print("right")
+                    x = x_max       
+                    y = y0 + int((x - x0) * k)
+                elif (code & 0x04) != 0:  # 线段与窗口的下边有交
+                    print("down")
+                    y = y_min
+                    x = x0 + int((y - y0)/k)
+                elif (code & 0x08) != 0:  # 线段与窗口的上边有交
+                    print("up")
+                    y = y_max                       
+                    x = x0 + int((y - y0)/k)
+                if code == code1:   #更新新端点值
+                    code1 = getCsCode(x,y,x_min,y_min,x_max,y_max)
+                    p_list[0] = [x,y]
+                else:
+                    code2 = getCsCode(x,y,x_min,y_min,x_max,y_max)
+                    p_list[1] = [x,y]   
+        return result
     elif algorithm == "Liang-Barsky":
         if x0 > x1:
             x0, y0, x1, y1 = x1, y1, x0, y0
