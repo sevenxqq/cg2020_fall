@@ -198,29 +198,26 @@ def bezier_alg(p_list, sz, step, startx):
 
 
 #计算N(i,p)(u),para: ctrlnum,i,p,u,节点向量从 0->n+p,ui = i
-def getcox(n, i, p, u):
+def getcox(i, p, u):
     ans = float(0)
     if p == 0:
         if u >= i and u < i + 1:
             return 1
         return 0
-    if u >= n + p:
-        return 0
-    ans = ans + (u - i) / p * getcox(
-        n, i, p - 1, u) + (i + p + 1 - u) / p * getcox(n, i + 1, p - 1, u)
+    ans = ans + (u - i) / p * getcox(i, p - 1, u) + (i + p + 1 - u) / p * getcox(i + 1, p - 1, u)
     return ans
 
 
 #para:ctrlpoint,n,p
 def bspline_alg(p_list, n, p, step):
     res = []
-    u = float(0)
-    while (u < n + p):
+    u = float(3)
+    while (u < n):
         x = float(0)
         y = float(0)
         val = []
         for i in range(0, n, 1):
-            temp = getcox(n, i, p, u)
+            temp = getcox(i, p, u)
             val.append(temp)
         for i in range(0, n, 1):
             x += p_list[i][0] * val[i]
@@ -239,10 +236,10 @@ def draw_curve(p_list, algorithm):
     :return: (list of list of int: [[x_0, y_0], [x_1, y_1], [x_2, y_2], ...]) 绘制结果的像素点坐标列表
     """
     if algorithm == "Bezier" or algorithm == 'bezier':
-        result = bezier_alg(p_list, len(p_list) - 1, 0.002, p_list[0][0])
+        result = bezier_alg(p_list, len(p_list) - 1, 0.001, p_list[0][0])
         return result
     elif algorithm == "B-spline":
-        result = bspline_alg(p_list, len(p_list), 3, 0.002)
+        result = bspline_alg(p_list, len(p_list), 3, 0.001)
         return result
     pass
 
