@@ -24,7 +24,7 @@ def draw_line(p_list, algorithm):
     if x0 == x1:
         if y0 > y1:
             y0, y1 = y1, y0
-        for y in range(y0, y1 + 1):
+        for y in range(int(y0), int(y1 + 1)):
             result.append([x0, y])
         return result
     elif y0 == y1:
@@ -238,7 +238,7 @@ def draw_curve(p_list, algorithm):
     if algorithm == "Bezier" or algorithm == 'bezier':
         result = bezier_alg(p_list, len(p_list) - 1, 0.001, p_list[0][0])
         return result
-    elif algorithm == "B-spline":
+    elif algorithm == "B-spline" or algorithm == 'b-spline':
         result = bspline_alg(p_list, len(p_list), 3, 0.001)
         return result
     pass
