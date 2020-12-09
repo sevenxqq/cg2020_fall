@@ -78,15 +78,15 @@ def draw_line(p_list, algorithm):
             dy = y1 - y0
             dy2 = dy * 2
             dy2dx = dy2 - dx * 2 * dirtion
-            pk = dy2-dx*dirtion
+            pk = dy2 - dx * dirtion
             y = y0 - 1
             for x in range(x0, x1 + 1, dirtion):
                 if pk >= 0:
                     y += 1
-                    pk +=dy2dx
+                    pk += dy2dx
                     result.append([x, y])
                 else:
-                    pk+=dy2
+                    pk += dy2
                     result.append([x, y])
         else:
             dirtion = 1
@@ -95,18 +95,18 @@ def draw_line(p_list, algorithm):
             dx = x1 - x0
             dy = y1 - y0
             dx2 = dx * 2
-            dy2dx = dx2 - dy * 2*dirtion
+            dy2dx = dx2 - dy * 2 * dirtion
             pk = dx2 - dy * dirtion
-            x = x0 - 1    
+            x = x0 - 1
             for y in range(y0, y1 + 1, dirtion):
-                if pk  < 0:
-                    pk+= dx2
-                    result.append([x, y])   
+                if pk < 0:
+                    pk += dx2
+                    result.append([x, y])
                 else:
                     x += 1
                     pk += dy2dx
                     result.append([x, y])
-                   
+
     return result
 
 
@@ -144,27 +144,27 @@ def draw_ellipse(p_list):
     y = ry
     pk = ry2 - rx2 * ry + rx2 / 4
     #####区域1
-    while ry2 * (x + 1)< rx2 * (y - 0.5):
+    while ry2 * (x + 1) < rx2 * (y - 0.5):
         if pk < 0:
-            pk += ry2 *(2*x +3)
+            pk += ry2 * (2 * x + 3)
             x += 1
             result.append([x, y])
-        else:  
-            pk += ry2 *(2*x+3) + rx2 * (2-2*y)
+        else:
+            pk += ry2 * (2 * x + 3) + rx2 * (2 - 2 * y)
             x += 1
             y -= 1
             result.append([x, y])
-    pk = ry * (x + 0.5) * 2 + rx * 2 * (y - 1) - rx*2*ry
+    pk = ry * (x + 0.5) * 2 + rx * 2 * (y - 1) - rx * 2 * ry
     ###区域2
     while y > 0:
         if pk < 0:
             x += 1
             y -= 1
-            pk += 2 * ry2 * x- 2 * rx2 * y + rx2   
-            result.append([x, y])          
+            pk += 2 * ry2 * x - 2 * rx2 * y + rx2
+            result.append([x, y])
         else:
             y -= 1
-            pk += rx2 - 2 * rx2 *y  
+            pk += rx2 - 2 * rx2 * y
             result.append([x, y])
     ###加入对称点
     length = len(result)
@@ -176,55 +176,58 @@ def draw_ellipse(p_list):
         result[i] = [basex + xc, basey + yc]
     return result
 
+
 ####################----------------------############
 #计算C(n,m)
-def comb(n,m):
-    return math.factorial(n)//(math.factorial(n-m)*math.factorial(m))
-def bezier_alg(p_list,sz,step,startx):
+def comb(n, m):
+    return math.factorial(n) // (math.factorial(n - m) * math.factorial(m))
+
+
+def bezier_alg(p_list, sz, step, startx):
     ans = []
     t = float(0)
-    while(t<1):
+    while (t < 1):
         x = float(0)
         y = float(0)
-        for i in range(0,sz+1,1):
-            x += comb(sz,i) *  pow(t, i) * pow(1-t,sz-i) * p_list[i][0] 
-            y += comb(sz,i) *  pow(t, i) * pow(1-t,sz-i) * p_list[i][1]
-        ans.append([x,y])
-        t+=step
+        for i in range(0, sz + 1, 1):
+            x += comb(sz, i) * pow(t, i) * pow(1 - t, sz - i) * p_list[i][0]
+            y += comb(sz, i) * pow(t, i) * pow(1 - t, sz - i) * p_list[i][1]
+        ans.append([x, y])
+        t += step
     return ans
 
+
 #计算N(i,p)(u),para: ctrlnum,i,p,u,节点向量从 0->n+p,ui = i
-def getcox(n,i,p,u):
+def getcox(n, i, p, u):
     ans = float(0)
-    if p==0:
-        if u>=i and u<i+1:
+    if p == 0:
+        if u >= i and u < i + 1:
             return 1
         return 0
-    if u>=n+p:
+    if u >= n + p:
         return 0
-    ans = ans + (u-i)/p * getcox(n,i,p-1,u) + (i+p+1-u)/p * getcox(n,i+1,p-1,u)
+    ans = ans + (u - i) / p * getcox(
+        n, i, p - 1, u) + (i + p + 1 - u) / p * getcox(n, i + 1, p - 1, u)
     return ans
+
+
 #para:ctrlpoint,n,p
-def bspline_alg(p_list,n,p,step):
+def bspline_alg(p_list, n, p, step):
     res = []
     u = float(0)
-    while(u < n+p):
+    while (u < n + p):
         x = float(0)
         y = float(0)
         val = []
-        for i in range (0,n,1):
-            temp = getcox(n,i,p,u)
+        for i in range(0, n, 1):
+            temp = getcox(n, i, p, u)
             val.append(temp)
-        for i in range(0,n,1):
+        for i in range(0, n, 1):
             x += p_list[i][0] * val[i]
             y += p_list[i][1] * val[i]
-        res.append([x,y])
-        u+=step
+        res.append([x, y])
+        u += step
     return res
-
-
-
-
 
 
 
@@ -235,12 +238,12 @@ def draw_curve(p_list, algorithm):
     :param algorithm: (string) 绘制使用的算法，包括'Bezier'和'B-spline'（三次均匀B样条曲线，曲线不必经过首末控制点）
     :return: (list of list of int: [[x_0, y_0], [x_1, y_1], [x_2, y_2], ...]) 绘制结果的像素点坐标列表
     """
-    if algorithm == "Bezier":
-        result = bezier_alg(p_list,len(p_list) - 1,0.002,p_list[0][0])
+    if algorithm == "Bezier" or algorithm == 'bezier':
+        result = bezier_alg(p_list, len(p_list) - 1, 0.002, p_list[0][0])
         return result
     elif algorithm == "B-spline":
-        result = bspline_alg(p_list,len(p_list),3,0.002)
-        return result   
+        result = bspline_alg(p_list, len(p_list), 3, 0.002)
+        return result
     pass
 
 
@@ -254,7 +257,7 @@ def translate(p_list, dx, dy):
     """
     res = []
     for i in range(len(p_list)):
-        res.append([p_list[i][0] + dx,p_list[i][1] + dy])
+        res.append([p_list[i][0] + dx, p_list[i][1] + dy])
     return res
 
 
@@ -267,22 +270,14 @@ def rotate(p_list, x, y, r):
     :param r: (int) 顺时针旋转角度（°）
     :return: (list of list of int: [[x_0, y_0], [x_1, y_1], [x_2, y_2], ...]) 变换后的图元参数
     """
-    radr = float(r / 90 * math.pi)
-    for i in range(len(p_list)):
-        p_list[i][0] = p_list[i][0] - x
-        p_list[i][1] = p_list[i][1] - y     
-    for i in range(len(p_list)):
-        oldx = p_list[i][0]
-        oldy = p_list[i][1]
-        p_list[i][0] = float(oldx) * float(math.cos(radr)) - float(oldy) * math.sin(radr)
-        p_list[i][1] = float(oldx) *math.sin(radr) + float(oldy)*math.cos(radr)
-    for i in range(len(p_list)):
-        p_list[i][0]+=x
-        p_list[i][1]+=y
-    return p_list
-    
-
-    
+    radr = float(r)
+    radr = radr * math.pi / 180
+    res = []
+    for oldx,oldy in p_list:
+        x1 = float((oldx - x) * math.cos(radr)) - float((oldy - y) * math.sin(radr)) + float(x)
+        y1 = float((oldx - x) * math.sin(radr)) + float((oldy - y) * math.cos(radr)) + float(y)
+        res.append([x1,y1])
+    return res
 
 
 def scale(p_list, x, y, s):
@@ -296,52 +291,56 @@ def scale(p_list, x, y, s):
     """
     for i in range(len(p_list)):
         p_list[i][0] = p_list[i][0] - x
-        p_list[i][1] = p_list[i][1] - y    
+        p_list[i][1] = p_list[i][1] - y
     for i in range(len(p_list)):
         p_list[i][0] = p_list[i][0] * s
-        p_list[i][1] = p_list[i][1] * s 
+        p_list[i][1] = p_list[i][1] * s
     for i in range(len(p_list)):
         p_list[i][0] = p_list[i][0] + x
-        p_list[i][1] = p_list[i][1] + y    
+        p_list[i][1] = p_list[i][1] + y
     return p_list
 
-
-
-#function for clip 
-def getCsCode(x,y,x_min, y_min, x_max, y_max):
+#function for clip
+def getCsCode(x, y, x_min, y_min, x_max, y_max):
     res = 0
-    if x<x_min:
-        res+=1
-    if x>x_max:
-        res+=2
-    if y<y_min:
-        res+=4
-    if y>y_max:
-        res+=8
+    if x < x_min:
+        res += 1
+    if x > x_max:
+        res += 2
+    if y < y_min:
+        res += 4
+    if y > y_max:
+        res += 8
     return res
-def getval(x0,y0,x1,y1,x_min, y_min, x_max, y_max):
+
+
+def getval(x0, y0, x1, y1, x_min, y_min, x_max, y_max):
     detax = x1 - x0
     detay = y1 - y0
     p1 = -detax
-    q1 = x0-x_min
+    q1 = x0 - x_min
     p2 = detax
     q2 = x_max - x0
     p3 = -detay
-    q3 = y0-y_min
+    q3 = y0 - y_min
     p4 = detay
-    q4 = y_max  - y0
+    q4 = y_max - y0
     p = []
-    p.extend([0,p1,p2,p3,p4])
+    p.extend([0, p1, p2, p3, p4])
     q = []
-    q.extend([0,q1,q2,q3,q4])
-    return detax,detay,p,q
-def calu(u1,u2,p,q):
-    for i in range(1,5,1):
-        if p[i]<0:
-            u1 = max(u1,float(q[i]/p[i]))
-        elif p[i]>0:
-            u2 = min(u2,float(q[i]/p[i]))
-    return u1,u2
+    q.extend([0, q1, q2, q3, q4])
+    return detax, detay, p, q
+
+
+def calu(u1, u2, p, q):
+    for i in range(1, 5, 1):
+        if p[i] < 0:
+            u1 = max(u1, float(q[i] / p[i]))
+        elif p[i] > 0:
+            u2 = min(u2, float(q[i] / p[i]))
+    return u1, u2
+
+
 def clip(p_list, x_min, y_min, x_max, y_max, algorithm):
     """线段裁剪
 
@@ -357,18 +356,17 @@ def clip(p_list, x_min, y_min, x_max, y_max, algorithm):
     x1, y1 = p_list[1]
     result = []
     if algorithm == "Cohen-Sutherland":
-        code1 = getCsCode(x0,y0,x_min,y_min,x_max,y_max)
-        code2 = getCsCode(x1,y1,x_min,y_min,x_max,y_max)
-        while(True):
-            print(code1,code2)
-            x0,y0,x1,y1 = p_list[0][0],p_list[0][1],p_list[1][0],p_list[1][1]
-            print(p_list)
+        code1 = getCsCode(x0, y0, x_min, y_min, x_max, y_max)
+        code2 = getCsCode(x1, y1, x_min, y_min, x_max, y_max)
+        while (True):
+            x0, y0, x1, y1 = p_list[0][0], p_list[0][1], p_list[1][0], p_list[
+                1][1]
             if (code1 | code2) == 0:
                 return draw_line(p_list, "Bresenham")
-            elif (code1 & code2) !=0:
+            elif (code1 & code2) != 0:
                 return result
-            else: 
-                k = (y1 - y0)/(x1 - x0)
+            else:
+                k = (y1 - y0) / (x1 - x0)
                 code = code1
                 if code1 == 0:  # 选可见的点
                     code = code2
@@ -378,35 +376,35 @@ def clip(p_list, x_min, y_min, x_max, y_max, algorithm):
                     y = y0 + int((x - x0) * k)
                 elif (code & 0x02) != 0:  # 线段与窗口的右边有交
                     print("right")
-                    x = x_max       
+                    x = x_max
                     y = y0 + int((x - x0) * k)
                 elif (code & 0x04) != 0:  # 线段与窗口的下边有交
                     print("down")
                     y = y_min
-                    x = x0 + int((y - y0)/k)
+                    x = x0 + int((y - y0) / k)
                 elif (code & 0x08) != 0:  # 线段与窗口的上边有交
                     print("up")
-                    y = y_max                       
-                    x = x0 + int((y - y0)/k)
-                if code == code1:   #更新新端点值
-                    code1 = getCsCode(x,y,x_min,y_min,x_max,y_max)
-                    p_list[0] = [x,y]
+                    y = y_max
+                    x = x0 + int((y - y0) / k)
+                if code == code1:  #更新新端点值
+                    code1 = getCsCode(x, y, x_min, y_min, x_max, y_max)
+                    p_list[0] = [x, y]
                 else:
-                    code2 = getCsCode(x,y,x_min,y_min,x_max,y_max)
-                    p_list[1] = [x,y]   
+                    code2 = getCsCode(x, y, x_min, y_min, x_max, y_max)
+                    p_list[1] = [x, y]
         return result
     elif algorithm == "Liang-Barsky":
         if x0 > x1:
             x0, y0, x1, y1 = x1, y1, x0, y0
-        detax,detay,p,q = getval( x0,y0,x1,y1,x_min,y_min,x_max,y_max)
+        detax, detay, p, q = getval(x0, y0, x1, y1, x_min, y_min, x_max, y_max)
         umax = float(0)
         umin = float(1)
-        if detax==0 and (q[1]<0 or q[2]<0):
-                return result
-        elif detay==0 and (q[3]<0 or q[4]<0):
-                return result
+        if detax == 0 and (q[1] < 0 or q[2] < 0):
+            return result
+        elif detay == 0 and (q[3] < 0 or q[4] < 0):
+            return result
         else:
-            umax,umin = calu(umax,umin,p,q)
+            umax, umin = calu(umax, umin, p, q)
             if umax > umin:
                 return result
             else:
@@ -414,7 +412,7 @@ def clip(p_list, x_min, y_min, x_max, y_max, algorithm):
                 y3 = int(y0 + umax * detay)
                 x4 = int(x0 + umin * detax)
                 y4 = int(y0 + umin * detay)
-                q_list=[]
-                q_list.extend([[x3,y3],[x4,y4]])
-                return draw_line(q_list,"Bresenham")
+                q_list = []
+                q_list.extend([[x3, y3], [x4, y4]])
+                return draw_line(q_list, "Bresenham")
     pass

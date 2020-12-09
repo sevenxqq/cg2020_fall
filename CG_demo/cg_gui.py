@@ -36,6 +36,11 @@ class MyCanvas(QGraphicsView):
         self.temp_item = None
     
     #设置self的各项参数
+    def start_draw_figure(self, algorithm, item_id,figtype):
+        self.status = figtype
+        self.temp_algorithm = algorithm
+        self.temp_id = item_id
+
     def start_draw_line(self, algorithm, item_id):
         self.status = 'line'
         self.temp_algorithm = algorithm
@@ -46,8 +51,14 @@ class MyCanvas(QGraphicsView):
         self.temp_algorithm = algorithm
         self.temp_id = item_id
 
+    def start_draw_ellipse(self,algorithm,item_id):
+        self.status = 'ellipse'
+        self.temp_algorithm = algorithm
+        self.temp_id = item_id
+
     def finish_draw(self):
         self.temp_id = self.main_window.get_id()
+        self.temp_item = None
 
     def clear_selection(self):
         if self.selected_id != '':
@@ -69,44 +80,80 @@ class MyCanvas(QGraphicsView):
         pos = self.mapToScene(event.localPos().toPoint())
         x = int(pos.x())
         y = int(pos.y())
-        if self.status == 'line':
+        if self.status == 'line' or self.status == 'ellipse':
             self.temp_item = MyItem(self.temp_id, self.status, [[x, y], [x, y]], self.temp_algorithm)
             self.scene().addItem(self.temp_item)
         elif self.status == 'polygon':
-            self.temp_item = MyItem(self.temp_id, self.status, [[x, y], [x, y]], self.temp_algorithm)
-            self.scene().addItem(self.temp_item)
+            if self.temp_item== None:   #想画一个多边形再画一个多边形怎么办
+                self.temp_item = MyItem(self.temp_id, self.status, [[x, y],[x,y]], self.temp_algorithm)
+                self.scene().addItem(self.temp_item)
+            else:
+                x0,y0 = self.temp_item.p_list[0]
+                if ((x-x0)**2 + (y-y0)**2 < 50) and len(self.temp_item.p_list)>3:
+                    self.item_dict[self.temp_id] = self.temp_item
+                    self.list_widget.addItem(self.temp_id)
+                    self.finish_draw()
+                else:
+                    self.temp_item.p_list.append([x,y])
+        elif self.status == 'curve':
+            if self.temp_item== None: 
+                self.temp_item = MyItem(self.temp_id, self.status, [[x, y], [x, y]], self.temp_algorithm)
+                self.scene().addItem(self.temp_item)
+            else:
+                x0,y0 = self.temp_item.p_list[0]
+                if ((x-x0)**2 + (y-y0)**2 < 50) and len(self.temp_item.p_list)>2:
+                    self.item_dict[self.temp_id] = self.temp_item
+                    self.list_widget.addItem(self.temp_id)
+                    self.finish_draw()
+                else:
+                    self.temp_item.p_list.append([x,y])
         self.updateScene([self.sceneRect()])
         super().mousePressEvent(event)
 
+    '''
+    椭圆和直线都是给两个点，按下-移动-释放
+    '''
     def mouseMoveEvent(self, event: QMouseEvent) -> None:
+        if self.temp_item == None:
+            pass
         pos = self.mapToScene(event.localPos().toPoint())
         x = int(pos.x())
         y = int(pos.y())
-        if self.status == 'line':
+        if self.status == 'line' or self.status =='ellipse':
             self.temp_item.p_list[1] = [x, y]
-        if self.status == 'polygon':
-            size = len(self.temp_item.p_list) 
-            self.temp_item.p_list[size - 1] = [x, y]
+        elif self.status == 'polygon' or self.status=='curve':
+            self.temp_item.p_list[-1] = [x,y]
         self.updateScene([self.sceneRect()])
         super().mouseMoveEvent(event)
 
-    #怎么表明多边形绘制完成
+    '''
+    #怎么表明多边形绘制完成：用的是边的距离不能＜7.
+    #直线：按下鼠标后拖动绘制，松开绘制完成
+    #多边形：
+    椭圆：按下鼠标后拖动绘制，松开绘制完成
+    曲线：
+    '''
+
+    def commonForMRW(self):
+        self.item_dict[self.temp_id] = self.temp_item
+        self.list_widget.addItem(self.temp_id)
+        self.finish_draw()
+
     def mouseReleaseEvent(self, event: QMouseEvent) -> None:
-        if self.status == 'line':
+        if self.status == 'line' or self.status == 'ellipse':
             self.item_dict[self.temp_id] = self.temp_item
             self.list_widget.addItem(self.temp_id)
             self.finish_draw()
+
         elif self.status == 'polygon':
-            size = len(self.temp_item.p_list) 
-            tmppit = self.temp_item.p_list[size - 1]
-            print(tmppit)
-            rectify = 5
-            self.temp_item.p_list.append(tmppit)
-            if abs(tmppit[0] - self.temp_item.p_list[0][0]) < rectify and abs(tmppit[1] - self.temp_item.p_list[0][1]) < rectify:
-                print("ok")
-                self.item_dict[self.temp_id] = self.temp_item
-                self.list_widget.addItem(self.temp_id)
-                self.finish_draw()
+            pass
+            # self.item_dict[self.temp_id] = self.temp_item
+            # self.list_widget.addItem(self.temp_id)
+            # self.finish_draw()
+        # elif self.status == 'ellipse':
+        #     self.item_dict[self.temp_id] = self.temp_item
+        #     self.list_widget.addItem(self.temp_id)
+        #     self.finish_draw()
         super().mouseReleaseEvent(event)
 
 
@@ -146,9 +193,19 @@ class MyItem(QGraphicsItem):
                 painter.setPen(QColor(255, 0, 0))
                 painter.drawRect(self.boundingRect())
         elif self.item_type == 'ellipse':
-            pass
+            item_pixels = alg.draw_ellipse(self.p_list)
+            for p in item_pixels:
+                painter.drawPoint(*p)
+            if self.selected:
+                painter.setPen(QColor(255, 0, 0))
+                painter.drawRect(self.boundingRect())
         elif self.item_type == 'curve':
-            pass
+            item_pixels = alg.draw_curve(self.p_list,self.algorithm)
+            for p in item_pixels:
+                painter.drawPoint(*p)
+            if self.selected:
+                painter.setPen(QColor(255, 0, 0))
+                painter.drawRect(self.boundingRect())
 
     #边界限制？
     def boundingRect(self) -> QRectF:
@@ -174,9 +231,22 @@ class MyItem(QGraphicsItem):
             h = y1 - y0
             return QRectF(x0 - 1, y0 - 1, w + 2, h + 2)
         elif self.item_type == 'ellipse':
-            pass
+            x0, y0 = self.p_list[0]
+            x1, y1 = self.p_list[1]
+            x = min(x0, x1)
+            y = min(y0, y1)
+            w = max(x0, x1) - x
+            h = max(y0, y1) - y
+            return QRectF(x - 1, y - 1, w + 2, h + 2)
         elif self.item_type == 'curve':
-            pass
+            x0, y0 = self.p_list[0]
+            x1, y1 = self.p_list[1]
+            x = min(x0, x1)
+            y = min(y0, y1)
+            w = max(x0, x1) - x
+            h = max(y0, y1) - y
+            return QRectF(x - 1, y - 1, w + 2, h + 2)
+            
 
 
 class MainWindow(QMainWindow):
@@ -230,8 +300,20 @@ class MainWindow(QMainWindow):
         line_naive_act.triggered.connect(self.line_naive_action)
         line_dda_act.triggered.connect(self.line_dda_action)
         line_bresenham_act.triggered.connect(self.line_bresenham_action)
+        #------------------------
         polygon_dda_act.triggered.connect(self.polygon_dda_action)
         polygon_bresenham_act.triggered.connect(self.polygon_bresenham_action)
+        #--------------------------
+        ellipse_act.triggered.connect(self.ellipse_action)
+        #-------------------------------
+        curve_bezier_act.triggered.connect(self.curve_bezier_action)
+        curve_b_spline_act.triggered.connect(self.curve_b_spline_action)
+        #-------------------------------
+        translate_act.triggered.connect(self.translate_action)
+        rotate_act.triggered.connect(self.rotate_action)
+        scale_act.triggered.connect(self.scale_action)
+        clip_cohen_sutherland_act.triggered.connect(self.clip_cohen_sutherland_action)
+        clip_liang_barsky_act.triggered.connect(self.clip_liang_barsky_action)
         self.list_widget.currentTextChanged.connect(self.canvas_widget.selection_changed)
 
         # 设置主窗口的布局
@@ -276,6 +358,34 @@ class MainWindow(QMainWindow):
         self.statusBar().showMessage('Bresenham算法绘制多边形')
         self.list_widget.clearSelection()
         self.canvas_widget.clear_selection()
+    
+    def ellipse_action(self):
+        self.canvas_widget.start_draw_ellipse('none', self.get_id())
+        self.statusBar().showMessage('中点画椭圆法绘制椭圆')
+        self.list_widget.clearSelection()
+        self.canvas_widget.clear_selection()
+
+    def curve_bezier_action(self):
+        self.canvas_widget.start_draw_figure('bezier', self.get_id(),'curve')
+        self.statusBar().showMessage('绘制贝塞尔曲线')
+        self.list_widget.clearSelection()
+        self.canvas_widget.clear_selection()
+    def curve_b_spline_action(self):
+        self.canvas_widget.start_draw_figure('b_spline', self.get_id(),'curve')
+        self.statusBar().showMessage('绘制三次b样条曲线')
+        self.list_widget.clearSelection()
+        self.canvas_widget.clear_selection()
+    #---------------变换-----------------
+    def translate_action(self):
+        pass
+    def rotate_action(self):
+        pass
+    def  scale_action(self):
+        pass
+    def clip_cohen_sutherland_action(self):
+        pass
+    def clip_liang_barsky_action(self):
+        pass
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
