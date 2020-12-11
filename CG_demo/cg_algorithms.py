@@ -357,17 +357,40 @@ def clip(p_list, x_min, y_min, x_max, y_max, algorithm):
     """
     x0, y0 = p_list[0]
     x1, y1 = p_list[1]
-    result = []
+    result = [[0,0],[0,0]]
     if algorithm == "Cohen-Sutherland":
+        q_list = [[x0,y0],[x1,y1]]
         code1 = getCsCode(x0, y0, x_min, y_min, x_max, y_max)
         code2 = getCsCode(x1, y1, x_min, y_min, x_max, y_max)
         while (True):
-            x0, y0, x1, y1 = p_list[0][0], p_list[0][1], p_list[1][0], p_list[1][1]
+            x0, y0, x1, y1 = q_list[0][0], q_list[0][1], q_list[1][0], q_list[1][1]
             if (code1 | code2) == 0:
-                return p_list
+                return q_list
             elif (code1 & code2) != 0:
                 return result
             else:
+                if x0 == x1:
+                    if x0<x_min or x0 > x_max:
+                        return result
+                    if y0 > y1:
+                        y0,y1 = y1,y0
+                    if y0 > y_max or y1 < y_min:
+                        return result
+                    y0 = max(y0,y_min)
+                    y1 = min(y1,y_max)
+                    q_list = [[x0,y0],x1,y1]
+                    return q_list
+                elif y0 == y1:
+                    if y0<y_min or y0 > y_max:
+                        return result
+                    if x0 > x1:
+                        x0,x1 = x1,x0
+                    if x0 > x_max or x1 < x_min:
+                        return result
+                    x0 = max(x0,x_min)
+                    x1 = min(x1,x_max)
+                    q_list = [[x0,y0],x1,y1]
+                    return q_list
                 k = (y1 - y0) / (x1 - x0)
                 code = code1
                 if code1 == 0:  # 选可见的点
@@ -390,10 +413,10 @@ def clip(p_list, x_min, y_min, x_max, y_max, algorithm):
                     x = x0 + int((y - y0) / k)
                 if code == code1:  #更新新端点值
                     code1 = getCsCode(x, y, x_min, y_min, x_max, y_max)
-                    p_list[0] = [x, y]
+                    q_list[0] = [x, y]
                 else:
                     code2 = getCsCode(x, y, x_min, y_min, x_max, y_max)
-                    p_list[1] = [x, y]
+                    q_list[1] = [x, y]
         return result
     elif algorithm == "Liang-Barsky":
         if x0 > x1:
