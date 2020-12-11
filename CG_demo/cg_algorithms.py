@@ -12,8 +12,14 @@ def draw_line(p_list, algorithm):
     :param algorithm: (string) 绘制使用的算法，包括'DDA'和'Bresenham'，此处的'Naive'仅作为示例，测试时不会出现
     :return: (list of list of int: [[x_0, y_0], [x_1, y_1], [x_2, y_2], ...]) 绘制结果的像素点坐标列表
     """
+    if len(p_list) !=2:
+        return []
     x0, y0 = p_list[0]
     x1, y1 = p_list[1]
+    x0 = int(x0)
+    y0 = int(y0)
+    x1 = int(x1)
+    y1 = int(y1)
     result = []
     """
         :处理特殊的直线
@@ -58,7 +64,7 @@ def draw_line(p_list, algorithm):
         : 为了让点更密集，当k绝对值>1时将x y反转
         """
         if k > -1 and k < 1:
-            for x in range(x0, x1 + 1):
+            for x in range(int(x0), int(x1 + 1)):
                 y = k * (x - x0) + y0
                 result.append([x, int(y)])
         else:
@@ -80,14 +86,14 @@ def draw_line(p_list, algorithm):
             dy2dx = dy2 - dx * 2 * dirtion
             pk = dy2 - dx * dirtion
             y = y0 - 1
-            for x in range(x0, x1 + 1, dirtion):
+            for x in range(int(x0), int(x1 + 1), dirtion):
                 if pk >= 0:
                     y += 1
                     pk += dy2dx
-                    result.append([x, y])
+                    result.append([int(x), int(y)])
                 else:
                     pk += dy2
-                    result.append([x, y])
+                    result.append([int(x), int(y)])
         else:
             dirtion = 1
             if k < 0:
@@ -98,14 +104,14 @@ def draw_line(p_list, algorithm):
             dy2dx = dx2 - dy * 2 * dirtion
             pk = dx2 - dy * dirtion
             x = x0 - 1
-            for y in range(y0, y1 + 1, dirtion):
+            for y in range(int(y0), int(y1 + 1), dirtion):
                 if pk < 0:
                     pk += dx2
-                    result.append([x, y])
+                    result.append([int(x), int(y)])
                 else:
                     x += 1
                     pk += dy2dx
-                    result.append([x, y])
+                    result.append([int(x), int(y)])
 
     return result
 
@@ -247,7 +253,7 @@ def draw_curve(p_list, algorithm):
 def translate(p_list, dx, dy):
     """平移变换
 
-    :param p_list: (list of list of int: [[x0, y0], [x1, y1], [x2, y2], ...]) 图元参数
+    :param p_list: (list of list of int: [[x0, y0], [x1, y1], [x2, y2], ...]) 图元点集
     :param dx: (int) 水平方向平移量
     :param dy: (int) 垂直方向平移量
     :return: (list of list of int: [[x_0, y_0], [x_1, y_1], [x_2, y_2], ...]) 变换后的图元参数
@@ -280,7 +286,7 @@ def rotate(p_list, x, y, r):
 def scale(p_list, x, y, s):
     """缩放变换
 
-    :param p_list: (list of list of int: [[x0, y0], [x1, y1], [x2, y2], ...]) 图元参数
+    :param p_list: (list of list of int: [[x0, y0], [x1, y1], [x2, y2], ...]) 图元点集
     :param x: (int) 缩放中心x坐标
     :param y: (int) 缩放中心y坐标
     :param s: (float) 缩放倍数
@@ -356,10 +362,9 @@ def clip(p_list, x_min, y_min, x_max, y_max, algorithm):
         code1 = getCsCode(x0, y0, x_min, y_min, x_max, y_max)
         code2 = getCsCode(x1, y1, x_min, y_min, x_max, y_max)
         while (True):
-            x0, y0, x1, y1 = p_list[0][0], p_list[0][1], p_list[1][0], p_list[
-                1][1]
+            x0, y0, x1, y1 = p_list[0][0], p_list[0][1], p_list[1][0], p_list[1][1]
             if (code1 | code2) == 0:
-                return draw_line(p_list, "Bresenham")
+                return p_list
             elif (code1 & code2) != 0:
                 return result
             else:
@@ -411,5 +416,5 @@ def clip(p_list, x_min, y_min, x_max, y_max, algorithm):
                 y4 = int(y0 + umin * detay)
                 q_list = []
                 q_list.extend([[x3, y3], [x4, y4]])
-                return draw_line(q_list, "Bresenham")
+                return q_list
     pass

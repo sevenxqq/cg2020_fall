@@ -112,7 +112,9 @@ if __name__ == '__main__':
                 c = int(line[4])
                 d = int(line[5])
                 algorithm = line[6]
-                res = alg.clip(item_dict[item_id][1],a,b,c,d,algorithm)
+                newplist = alg.clip(item_dict[item_id][1],a,b,c,d,algorithm)
+                res = alg.draw_line(newplist, "Bresenham")
+                item_dict[item_id][1] = newplist
                 item_dict[item_id][4] = res
             ...
 
