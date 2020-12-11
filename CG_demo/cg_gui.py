@@ -75,7 +75,6 @@ class MyCanvas(QGraphicsView):
         self.plist=self.temp_item.p_list
 
     def start_clip(self, algorithm):
-        print("start clip")
         if self.selected_id=='':
             self.status = ''
             return
@@ -103,6 +102,7 @@ class MyCanvas(QGraphicsView):
             self.item_dict[self.selected_id] = self.temp_item
             self.temp_item = None
             self.status =None
+            self.plist = None
             
 
     def clear_selection(self):
@@ -169,9 +169,7 @@ class MyCanvas(QGraphicsView):
                 angle = math.degrees(radangle)
             self.temp_item.p_list=alg.rotate(self.plist,self.start_pos[0],self.start_pos[1],angle)
         elif self.status == 'clip':
-            print("move",self.plist)
             self.temp_item.p_list=alg.clip(self.plist,self.start_pos[0],self.start_pos[1],x,y,self.temp_algorithm)
-            print("2",self.temp_item.p_list)
         self.updateScene([self.sceneRect()])
         super().mouseMoveEvent(event)
 
@@ -198,21 +196,16 @@ class MyCanvas(QGraphicsView):
             self.plist =self.temp_item.p_list
             self.finish_fluctuate()
         elif self.status == 'clip' :
-            print("鼠标释放，裁剪")
             self.temp_item.p_list=alg.clip(self.plist,self.start_pos[0],self.start_pos[1],x,y,self.temp_algorithm)
-            self.plist =self.temp_item.p_list
-            print(self.plist)
-            print("ok")
+            self.updateScene([self.sceneRect()])
             self.finish_fluctuate()
         self.updateScene([self.sceneRect()])
         super().mouseReleaseEvent(event)
 
     def wheelEvent (self, event):
-        print("wheelevent")
         x = event.angleDelta().x()
         y = event.angleDelta().y()
         if self.status == 'scale' :
-            print("line209调用scale")
             if event.angleDelta().y() > 0:  #向上滚
                 s = 1.2
             else:
