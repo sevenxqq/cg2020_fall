@@ -37,6 +37,7 @@ class MyCanvas(QGraphicsView):
         #----------
         self.start_pos = None
         self.angel = None
+        self.plist=None
     
     #设置item的各项参数
     def start_draw_figure(self, algorithm, item_id,figtype):
@@ -72,18 +73,9 @@ class MyCanvas(QGraphicsView):
         self.status = scaletype
         self.temp_item=self.item_dict[self.selected_id]
         self.plist=self.temp_item.p_list
-        # if self.status == 'ensmall':
-        #     s = 0.9
-        #     self.temp_item.p_list=alg.scale(self.plist,self.start_pos[0],self.start_pos[1],s)
-        #     self.plist =self.temp_item.p_list
-        #     self.finish_fluctuate()
-        # if self.status == 'enlarge':
-        #     s = 1.1
-        #     self.temp_item.p_list=alg.scale(self.plist,self.start_pos[0],self.start_pos[1],s)
-        #     self.plist =self.temp_item.p_list
-        #     self.finish_fluctuate()  
 
     def start_clip(self, algorithm):
+        print("start clip")
         if self.selected_id=='':
             self.status = ''
             return
@@ -111,6 +103,7 @@ class MyCanvas(QGraphicsView):
             self.item_dict[self.selected_id] = self.temp_item
             self.temp_item = None
             self.status =None
+            
 
     def clear_selection(self):
         if self.selected_id != '':
@@ -176,8 +169,9 @@ class MyCanvas(QGraphicsView):
                 angle = math.degrees(radangle)
             self.temp_item.p_list=alg.rotate(self.plist,self.start_pos[0],self.start_pos[1],angle)
         elif self.status == 'clip':
-            print(self.plist)
+            print("move",self.plist)
             self.temp_item.p_list=alg.clip(self.plist,self.start_pos[0],self.start_pos[1],x,y,self.temp_algorithm)
+            print("2",self.temp_item.p_list)
         self.updateScene([self.sceneRect()])
         super().mouseMoveEvent(event)
 
@@ -217,13 +211,6 @@ class MyCanvas(QGraphicsView):
         print("wheelevent")
         x = event.angleDelta().x()
         y = event.angleDelta().y()
-        # if self.status == 'rotate':
-        #     if(event.angleDelta().y()<0):
-        #         self.angel=self.angel-1
-        #     else:
-        #         self.angel=self.angel+1
-        #     self.temp_item.p_list=alg.rotate(self.plist,self.start_pos[0],self.start_pos[1],self.angel)
-        
         if self.status == 'scale' :
             print("line209调用scale")
             if event.angleDelta().y() > 0:  #向上滚
@@ -259,7 +246,6 @@ class MyItem(QGraphicsItem):
             return
         item_pixels = None
         if self.item_type == 'line':
-            print("draw line")
             item_pixels = alg.draw_line(self.p_list, self.algorithm)
         elif self.item_type == 'polygon':
             item_pixels = alg.draw_polygon(self.p_list, self.algorithm)
@@ -336,6 +322,7 @@ class MainWindow(QMainWindow):
         set_pen_act = file_menu.addAction('设置画笔')
         reset_canvas_act = file_menu.addAction('重置画布')
         exit_act = file_menu.addAction('退出')
+        #------------------------
         draw_menu = menubar.addMenu('绘制')
         line_menu = draw_menu.addMenu('线段')
         line_naive_act = line_menu.addAction('Naive')
@@ -353,8 +340,6 @@ class MainWindow(QMainWindow):
         translate_act = edit_menu.addAction('平移')
         rotate_act = edit_menu.addAction('旋转')
         scale_act= edit_menu.addAction('缩放')
-        # scale_enlarge_act = scale_menu.addAction('+')
-        # scale_ensmall_act = scale_menu.addAction('-')
         clip_menu = edit_menu.addMenu('裁剪')
         clip_cohen_sutherland_act = clip_menu.addAction('Cohen-Sutherland')
         clip_liang_barsky_act = clip_menu.addAction('Liang-Barsky')
