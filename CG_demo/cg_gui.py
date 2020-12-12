@@ -5,6 +5,7 @@ import sys
 import cg_algorithms as alg
 from typing import Optional
 from PyQt5.QtWidgets import (
+    QColorDialog,
     QApplication,
     QMainWindow,
     qApp,
@@ -38,7 +39,10 @@ class MyCanvas(QGraphicsView):
         self.start_pos = None
         self.angel = None
         self.plist=None
-    
+        self.temp_col = QColor(0,0,255)
+
+    def update_corlor(self,col):
+        self.temp_col = col
     #设置item的各项参数
     def start_draw_figure(self, algorithm, item_id,figtype):
         self.status = figtype
@@ -127,10 +131,12 @@ class MyCanvas(QGraphicsView):
         y = int(pos.y())
         if self.status == 'line' or self.status == 'ellipse':
             self.temp_item = MyItem(self.temp_id, self.status, [[x, y], [x, y]], self.temp_algorithm)
+            self.temp_item.setcor(self.temp_col)
             self.scene().addItem(self.temp_item)
         elif self.status == 'polygon' or self.status == 'curve':
             if self.temp_item== None:   
                 self.temp_item = MyItem(self.temp_id, self.status, [[x, y]], self.temp_algorithm)
+                self.temp_item.setcor(self.temp_col)
                 self.scene().addItem(self.temp_item)
             else:
                 self.temp_item.p_list.append([x,y])
@@ -233,11 +239,16 @@ class MyItem(QGraphicsItem):
         self.p_list = p_list        # 图元参数
         self.algorithm = algorithm  # 绘制算法，'DDA'、'Bresenham'、'Bezier'、'B-spline'等
         self.selected = False
+        self.pencol = QColor(0,0,255)
+    
+    def setcor(self,col):
+        self.pencol = col
 
     def paint(self, painter: QPainter, option: QStyleOptionGraphicsItem, widget: Optional[QWidget] = ...) -> None:
         if self.item_type =='':
             return
         item_pixels = None
+        painter.setPen(self.pencol)
         if self.item_type == 'line':
             item_pixels = alg.draw_line(self.p_list, self.algorithm)
         elif self.item_type == 'polygon':
@@ -296,7 +307,7 @@ class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
         self.item_cnt = 0
-
+        
         # 使用QListWidget来记录已有的图元，并用于选择图元。注：这是图元选择的简单实现方法，更好的实现是在画布中直接用鼠标选择图元
         self.list_widget = QListWidget(self)
         self.list_widget.setMinimumWidth(200)
@@ -342,7 +353,9 @@ class MainWindow(QMainWindow):
         
 
         # 连接信号和槽函数
+        set_pen_act.triggered.connect(self.set_pen_action)
         exit_act.triggered.connect(qApp.quit)
+        #----------------------------
         line_naive_act.triggered.connect(self.line_naive_action)
         line_dda_act.triggered.connect(self.line_dda_action)
         line_bresenham_act.triggered.connect(self.line_bresenham_action)
@@ -383,7 +396,16 @@ class MainWindow(QMainWindow):
         _id = str(self.item_cnt)
         self.item_cnt += 1
         return _id
+    #画布操作------
+    def set_pen_action(self):
+        self.statusBar().showMessage('设置画笔')
+        col = QColorDialog.getColor()
+        if col.isValid():
+            self.canvas_widget.update_corlor(col)
+        self.list_widget.clearSelection()
+        self.canvas_widget.clear_selection()
 
+    #------------
     def line_naive_action(self):
         self.canvas_widget.start_draw_figure('Naive', str(self.item_cnt),'line')
         self.statusBar().showMessage('Naive算法绘制线段')
