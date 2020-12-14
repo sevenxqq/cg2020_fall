@@ -133,6 +133,7 @@ class MyCanvas(QGraphicsView):
             self.selected_id = ''
 
     def selection_changed(self, selected):
+        selected = selected.text()
         self.main_window.statusBar().showMessage('图元选择： %s' % selected)
         if self.selected_id != '':
             self.item_dict[self.selected_id].selected = False
@@ -403,7 +404,9 @@ class MainWindow(QMainWindow):
         #-------------
         ok_act.triggered.connect(self.ok_action)
        
-        self.list_widget.currentTextChanged.connect(self.canvas_widget.selection_changed)
+        # self.list_widget.currentTextChanged.connect(self.canvas_widget.selection_changed)
+        self.list_widget.itemClicked.connect(self.canvas_widget.selection_changed)
+       
 
         # 设置主窗口的布局
         self.hbox_layout = QHBoxLayout()
