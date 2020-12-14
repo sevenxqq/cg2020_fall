@@ -47,8 +47,7 @@ class MyCanvas(QGraphicsView):
         self.temp_col = col
     def reset_canvas(self):
         for figure_item in self.item_dict:
-            self.temp_item=self.item_dict[figure_item]
-            self.temp_item.p_list = None
+            self.item_dict[figure_item].p_list = None
             self.updateScene([self.sceneRect()])
         self.item_dict = {}
         self.list_widget.clear()
@@ -138,6 +137,8 @@ class MyCanvas(QGraphicsView):
         if self.selected_id != '':
             self.item_dict[self.selected_id].selected = False
             self.item_dict[self.selected_id].update()
+        if selected == '':
+            return
         self.selected_id = selected
         self.item_dict[selected].selected = True
         self.item_dict[selected].update()
@@ -396,8 +397,6 @@ class MainWindow(QMainWindow):
         translate_act.triggered.connect(self.translate_action)
         rotate_act.triggered.connect(self.rotate_action)
         #-------------------
-        # scale_enlarge_act.triggered.connect(self.enlarge_action)
-        # scale_ensmall_act.triggered.connect(self.ensmall_action)
         scale_act.triggered.connect(self.scale_action)
         clip_cohen_sutherland_act.triggered.connect(self.clip_cohen_sutherland_action)
         clip_liang_barsky_act.triggered.connect(self.clip_liang_barsky_action)
@@ -490,31 +489,36 @@ class MainWindow(QMainWindow):
         self.canvas_widget.clear_selection()
     
     def ok_action(self):
-      self.canvas_widget.finish_draw()
+        self.canvas_widget.finish_draw()
+        self.list_widget.clearSelection()
+        self.canvas_widget.clear_selection()
     #---------------变换-----------------
     def translate_action(self):
         self.canvas_widget.start_translate()
         self.statusBar().showMessage('平移变换')
+        self.list_widget.clearSelection()
+        self.canvas_widget.clear_selection()
     def rotate_action(self):
         self.canvas_widget.start_rotate()
         self.statusBar().showMessage('旋转变换')
+        self.list_widget.clearSelection()
+        self.canvas_widget.clear_selection()
     def  scale_action(self):
         self.canvas_widget.start_scale("scale")
         self.statusBar().showMessage('缩放变换')
-    def enlarge_action(self):
-        self.canvas_widget.start_scale('enlarge')
-        self.statusBar().showMessage('缩放变换--放大')
-       
-    def ensmall_action(self):
-        self.canvas_widget.start_scale('ensmall')
-        self.statusBar().showMessage('缩放变换--缩小')
+        self.list_widget.clearSelection()
+        self.canvas_widget.clear_selection()
         
     def clip_cohen_sutherland_action(self):
         self.canvas_widget.start_clip("Cohen-Sutherland")
         self.statusBar().showMessage('裁剪变换-cohen-sutherland')
+        self.list_widget.clearSelection()
+        self.canvas_widget.clear_selection()
     def clip_liang_barsky_action(self):
         self.canvas_widget.start_clip("Liang-Barsky")
         self.statusBar().showMessage('裁剪变换-liang-barsky')
+        self.list_widget.clearSelection()
+        self.canvas_widget.clear_selection()
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
