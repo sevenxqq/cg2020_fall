@@ -5,6 +5,8 @@ import sys
 import cg_algorithms as alg
 from typing import Optional
 from PyQt5.QtWidgets import (
+   
+    QFileDialog,
     QColorDialog,
     QApplication,
     QMainWindow,
@@ -16,7 +18,7 @@ from PyQt5.QtWidgets import (
     QHBoxLayout,
     QWidget,
     QStyleOptionGraphicsItem)
-from PyQt5.QtGui import QPainter, QMouseEvent, QColor
+from PyQt5.QtGui import QColor, QMouseEvent, QPainter, QPixmap
 from PyQt5.QtCore import QRectF
 import math
 
@@ -43,6 +45,23 @@ class MyCanvas(QGraphicsView):
 
     def update_corlor(self,col):
         self.temp_col = col
+    def reset_canvas(self):
+        for figure_item in self.item_dict:
+            self.temp_item=self.item_dict[figure_item]
+            self.temp_item.p_list = None
+            self.updateScene([self.sceneRect()])
+        self.item_dict = {}
+        self.list_widget.clear()
+    def save_canvas(self,filename,w,h):
+        painter = QPainter()
+        pix = QPixmap(w, h)
+        pix.fill(QColor(255,255,255))
+        painter.begin(pix)
+        for item in self.item_dict:
+            self.item_dict[item].paint(painter,QStyleOptionGraphicsItem)
+        painter.end()
+        pix.save(filename)
+
     #设置item的各项参数
     def start_draw_figure(self, algorithm, item_id,figtype):
         self.status = figtype
@@ -286,6 +305,8 @@ class MyItem(QGraphicsItem):
         #     w = x1 - x0
         #     h = y1 - y0
         #     return QRectF(x0 - 1, y0 - 1, w + 2, h + 2)
+        if self.p_list == None:
+            return QRectF(0, 0, 0,0)
         x0 ,y0 = self.p_list[0]
         x1 = x0
         y1 = y0
@@ -307,7 +328,8 @@ class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
         self.item_cnt = 0
-        
+        self.w = 600
+        self.h = 600
         # 使用QListWidget来记录已有的图元，并用于选择图元。注：这是图元选择的简单实现方法，更好的实现是在画布中直接用鼠标选择图元
         self.list_widget = QListWidget(self)
         self.list_widget.setMinimumWidth(200)
@@ -325,6 +347,7 @@ class MainWindow(QMainWindow):
         file_menu = menubar.addMenu('文件')
         set_pen_act = file_menu.addAction('设置画笔')
         reset_canvas_act = file_menu.addAction('重置画布')
+        save_canvas_act = file_menu.addAction('保存画布')
         exit_act = file_menu.addAction('退出')
         #------------------------
         draw_menu = menubar.addMenu('绘制')
@@ -354,6 +377,8 @@ class MainWindow(QMainWindow):
 
         # 连接信号和槽函数
         set_pen_act.triggered.connect(self.set_pen_action)
+        reset_canvas_act.triggered.connect(self.reset_canvas_action)
+        save_canvas_act.triggered.connect(self.save_canvas_action)
         exit_act.triggered.connect(qApp.quit)
         #----------------------------
         line_naive_act.triggered.connect(self.line_naive_action)
@@ -404,7 +429,21 @@ class MainWindow(QMainWindow):
             self.canvas_widget.update_corlor(col)
         self.list_widget.clearSelection()
         self.canvas_widget.clear_selection()
-
+    def reset_canvas_action(self):
+        self.statusBar().showMessage('重置画布')
+        self.list_widget.clearSelection()
+        self.canvas_widget.clear_selection()
+        self.canvas_widget.reset_canvas()
+        self.item_cnt = 0
+    def save_canvas_action(self):
+        self.list_widget.clearSelection()
+        self.canvas_widget.clear_selection()
+        self.statusBar().showMessage('保存画布')
+        dialog=QFileDialog()
+        filename=dialog.getSaveFileName(filter="Image Files(*.jpg *.png *.bmp)")
+        if filename[0]:
+            self.canvas_widget.save_canvas(filename[0], self.w, self.h)
+    
     #------------
     def line_naive_action(self):
         self.canvas_widget.start_draw_figure('Naive', str(self.item_cnt),'line')
