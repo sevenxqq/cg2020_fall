@@ -44,14 +44,20 @@ class MyCanvas(QGraphicsView):
         self.temp_col = QColor(0,0,255)
 
     def update_corlor(self,col):
+        if self.status == 'polygon' or self.status == 'curve': #没画完就选择了变颜色
+            self.finish_draw() 
         self.temp_col = col
     def reset_canvas(self):
+        if self.status == 'polygon' or self.status == 'curve': #没画完就点击了重置
+            self.finish_draw()
         for figure_item in self.item_dict:
             self.item_dict[figure_item].p_list = None
             self.updateScene([self.sceneRect()])
         self.item_dict = {}
         self.list_widget.clear()
     def save_canvas(self,filename,w,h):
+        if self.status == 'polygon' or self.status == 'curve': #没画完就点击了保存
+            self.finish_draw()
         painter = QPainter()
         pix = QPixmap(w, h)
         pix.fill(QColor(255,255,255))
@@ -63,12 +69,17 @@ class MyCanvas(QGraphicsView):
 
     #设置item的各项参数
     def start_draw_figure(self, algorithm, item_id,figtype):
+        if self.status == 'polygon' or self.status == 'curve': #没画完就点击画了别的图元
+            self.finish_draw() #注意这里item_cnt会+1，而传入的temp_id是+1前的
+            item_id+=1
         self.status = figtype
         self.temp_algorithm = algorithm
         self.temp_id = item_id
 
 
     def start_translate(self):
+        if self.status == 'polygon' or self.status == 'curve': #没画完就选择了变换
+            self.finish_draw() 
         if self.selected_id=='':
             self.status = ''
             return
@@ -77,6 +88,8 @@ class MyCanvas(QGraphicsView):
         self.plist=self.temp_item.p_list
 
     def start_rotate(self):
+        if self.status == 'polygon' or self.status == 'curve': #没画完就选择了变换
+            self.finish_draw() 
         if self.selected_id=='':
             self.status = ''
             return
@@ -89,6 +102,8 @@ class MyCanvas(QGraphicsView):
         self.angel=0
 
     def start_scale(self,scaletype):
+        if self.status == 'polygon' or self.status == 'curve': #没画完就选择了变换
+            self.finish_draw() 
         if self.selected_id=='':
             self.status = ''
             return
@@ -97,6 +112,8 @@ class MyCanvas(QGraphicsView):
         self.plist=self.temp_item.p_list
 
     def start_clip(self, algorithm):
+        if self.status == 'polygon' or self.status == 'curve': #没画完就选择了变换
+            self.finish_draw() 
         if self.selected_id=='':
             self.status = ''
             return
@@ -133,6 +150,8 @@ class MyCanvas(QGraphicsView):
             self.selected_id = ''
 
     def selection_changed(self, selected):
+        if self.status == 'polygon' or self.status == 'curve': #没画完就选择了列表
+            self.finish_draw() 
         selected = selected.text()
         self.main_window.statusBar().showMessage('图元选择： %s' % selected)
         if self.selected_id != '':
@@ -448,8 +467,8 @@ class MainWindow(QMainWindow):
     
     #------------
     def line_naive_action(self):
-        self.canvas_widget.start_draw_figure('Naive', str(self.item_cnt),'line')
         self.statusBar().showMessage('Naive算法绘制线段')
+        self.canvas_widget.start_draw_figure('Naive', str(self.item_cnt),'line')
         self.list_widget.clearSelection()
         self.canvas_widget.clear_selection()
     def line_dda_action(self):
@@ -464,8 +483,8 @@ class MainWindow(QMainWindow):
         self.canvas_widget.clear_selection()
 
     def polygon_dda_action(self):
-        self.canvas_widget.start_draw_figure('DDA', str(self.item_cnt),'polygon')
         self.statusBar().showMessage('DDA算法绘制多边形')
+        self.canvas_widget.start_draw_figure('DDA', str(self.item_cnt),'polygon') 
         self.list_widget.clearSelection()
         self.canvas_widget.clear_selection()
     def polygon_bresenham_action(self):
