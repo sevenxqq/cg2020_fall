@@ -273,7 +273,8 @@ def rotate(p_list, x, y, r):
     :param r: (int) 顺时针旋转角度（°）
     :return: (list of list of int: [[x_0, y_0], [x_1, y_1], [x_2, y_2], ...]) 变换后的图元参数
     """
-    radr = float(r)
+    r = r % 360
+    radr = float(r) 
     radr = radr * math.pi / 180
     res = []
     for oldx,oldy in p_list:
@@ -292,16 +293,12 @@ def scale(p_list, x, y, s):
     :param s: (float) 缩放倍数
     :return: (list of list of int: [[x_0, y_0], [x_1, y_1], [x_2, y_2], ...]) 变换后的图元参数
     """
-    for i in range(len(p_list)):
-        p_list[i][0] = p_list[i][0] - x
-        p_list[i][1] = p_list[i][1] - y
-    for i in range(len(p_list)):
-        p_list[i][0] = p_list[i][0] * s
-        p_list[i][1] = p_list[i][1] * s
-    for i in range(len(p_list)):
-        p_list[i][0] = p_list[i][0] + x
-        p_list[i][1] = p_list[i][1] + y
-    return p_list
+    res = []
+    for oldx,oldy in p_list:
+        x1 = float((oldx - x) * s) + float(x) 
+        y1 = float((oldy - y) * s) + float(y) 
+        res.append([x1,y1])
+    return res
 
 #function for clip
 def getCsCode(x, y, x_min, y_min, x_max, y_max):

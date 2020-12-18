@@ -142,6 +142,7 @@ class MyCanvas(QGraphicsView):
             self.temp_item = None
             self.status =None
             self.plist = None
+            self.start_pos = None
             
 
     def clear_selection(self):
@@ -202,7 +203,8 @@ class MyCanvas(QGraphicsView):
         elif self.status == 'translate':
             self.temp_item.p_list=alg.translate(self.plist,x-self.start_pos[0],y-self.start_pos[1])
         elif self.status == 'rotate':
-            print("new")
+            if self.start_pos == None:
+                return
             detax = x - self.start_pos[0]
             detay = y - self.start_pos[1]
             chord = math.sqrt(detax**2 + detay**2)
@@ -213,12 +215,11 @@ class MyCanvas(QGraphicsView):
                 if detax < 0 : #第二,三象限
                     angle = 180 - angle
                 elif detay < 0: #第四象限
-                    print("befor",angle)
                     angle = angle + 360
-
-            print(angle)
             self.temp_item.p_list=alg.rotate(self.plist,self.start_pos[0],self.start_pos[1],angle)
         elif self.status == 'clip':
+            if self.start_pos == None:
+                return
             self.temp_item.p_list=alg.clip(self.plist,self.start_pos[0],self.start_pos[1],x,y,self.temp_algorithm)
         self.updateScene([self.sceneRect()])
         super().mouseMoveEvent(event)
@@ -253,13 +254,15 @@ class MyCanvas(QGraphicsView):
         super().mouseReleaseEvent(event)
 
     def wheelEvent (self, event):
+        if self.start_pos == None:
+            return
         x = event.angleDelta().x()
-        y = event.angleDelta().y()
+        y = event.angleDelta().y() /120
         if self.status == 'scale' :
-            if event.angleDelta().y() > 0:  #向上滚
-                s = 1.2
+            if y > 0:  #向上滚,放大
+                s = 1 + y/10
             else:
-                s = 0.8
+                s = 1/(1 - y/10)
             self.temp_item.p_list=alg.scale(self.plist,self.start_pos[0],self.start_pos[1],s)
             self.plist =self.temp_item.p_list
             self.finish_fluctuate()
