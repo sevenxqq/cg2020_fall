@@ -69,9 +69,9 @@ class MyCanvas(QGraphicsView):
 
     #设置item的各项参数
     def start_draw_figure(self, algorithm, item_id,figtype):
-        if self.status == 'polygon' or self.status == 'curve': #没画完就点击画了别的图元
+        if self.temp_item != None and (self.status == 'polygon' or self.status == 'curve'): #没画完就点击画了别的图元
             self.finish_draw() #注意这里item_cnt会+1，而传入的temp_id是+1前的
-            item_id+=1
+            item_id = str(int(item_id) + 1)
         self.status = figtype
         self.temp_algorithm = algorithm
         self.temp_id = item_id
@@ -202,17 +202,21 @@ class MyCanvas(QGraphicsView):
         elif self.status == 'translate':
             self.temp_item.p_list=alg.translate(self.plist,x-self.start_pos[0],y-self.start_pos[1])
         elif self.status == 'rotate':
+            print("new")
             detax = x - self.start_pos[0]
             detay = y - self.start_pos[1]
+            chord = math.sqrt(detax**2 + detay**2)
             angle = 0
-            if detax == 0:
-                if  detay > 0:
-                    angle = 90
-                elif detay < 0:
-                    angle = 270
-            else:
-                radangle = math.atan(detay/detax)
+            if chord!=0:
+                radangle = math.asin(detay/chord)
                 angle = math.degrees(radangle)
+                if detax < 0 : #第二,三象限
+                    angle = 180 - angle
+                elif detay < 0: #第四象限
+                    print("befor",angle)
+                    angle = angle + 360
+
+            print(angle)
             self.temp_item.p_list=alg.rotate(self.plist,self.start_pos[0],self.start_pos[1],angle)
         elif self.status == 'clip':
             self.temp_item.p_list=alg.clip(self.plist,self.start_pos[0],self.start_pos[1],x,y,self.temp_algorithm)
