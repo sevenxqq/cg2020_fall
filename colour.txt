@@ -10,3 +10,24 @@ https://tool.css-js.com/rgba.html
 255 255 0 黄色
 0 155 127 春青
 255 0 0 红色
+
+#latex操作手册
+https://blog.csdn.net/weixin_39278265/article/details/88406290
+https://blog.csdn.net/meiqi0538/article/details/82887300
+
+#运行测试指令
+python3 cg_cli.py input_file output_dir
+python3 cg_gui.py
+//eg:   python3 cg_cli.py input/stdinput.txt output/myoutput
+
+#测试直线
+setColor 255 165 0
+drawLine line1 100 50 500 200 DDA
+
+setColor 255 0 0
+drawLine line2 200 300 400 150 DDA
+
+setColor 0 255 0
+drawLine line3 200 300 400 150 DDA
+
+saveCanvas 1
